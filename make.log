@@ -1,0 +1,34 @@
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -c -o aux.o aux.c
+aux.c: In function `chowner':
+aux.c:79: warning: comparison is always false due to limited range of data type
+aux.c:79: warning: comparison is always false due to limited range of data type
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -c -o reclinker.o reclinker.c
+reclinker.c: In function `removelink':
+reclinker.c:32: warning: comparison is always true due to limited range of data type
+reclinker.c:32: warning: comparison is always true due to limited range of data type
+reclinker.c:76: warning: comparison is always true due to limited range of data type
+reclinker.c:77: warning: comparison is always true due to limited range of data type
+reclinker.c: In function `removedir':
+reclinker.c:137: warning: comparison is always true due to limited range of data type
+reclinker.c:138: warning: comparison is always true due to limited range of data type
+reclinker.c: In function `linker':
+reclinker.c:174: warning: comparison is always true due to limited range of data type
+reclinker.c:174: warning: comparison is always true due to limited range of data type
+reclinker.c: In function `test':
+reclinker.c:267: warning: comparison is always true due to limited range of data type
+reclinker.c:267: warning: comparison is always true due to limited range of data type
+reclinker.c:292: warning: comparison is always true due to limited range of data type
+reclinker.c:293: warning: comparison is always true due to limited range of data type
+reclinker.c: In function `main':
+reclinker.c:571: warning: comparison is always false due to limited range of data type
+reclinker.c:579: warning: comparison is always false due to limited range of data type
+reclinker.c:587: warning: comparison is always false due to limited range of data type
+reclinker.c:595: warning: comparison is always false due to limited range of data type
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -c -o pathparse.o pathparse.c
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -c -o myarray.o myarray.c
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -c -o get_line_from_file.o get_line_from_file.c
+diet gcc -nostdinc -O2 -fomit-frame-pointer -march=i686 -mcpu=athlon-tbird  -o reclinker reclinker.o aux.o pathparse.o myarray.o get_line_from_file.o
+/opt/diet/lib-i386/libc.a(vfprintf.o): In function `vfprintf':
+vfprintf.o(.text+0x37): warning: the printf functions add several kilobytes of bloat.
+/opt/diet/lib-i386/libc.a(stderr.o): In function `__fflush_stderr':
+stderr.o(.text+0x7): warning: your code uses stdio (7+k bloat).
