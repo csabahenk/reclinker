@@ -1,0 +1,3 @@
+User management functions don't work in libs statically linked to glibc.
+Sure this was a problem for the busybox crowd, too. So they reimplemented
+that stuff. Here is what they've done. 

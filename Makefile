@@ -11,6 +11,12 @@ COBJS = ${CSRC:.c=.o}
 reclinker: ${COBJS} 
 	$(CC) $(CFLAGS) $(WFLAGS) -o $@ ${COBJS}
 
+pwdgrp:
+	$(MAKE) -C libpwdgrp
+
+glibc-static: ${COBJS} pwdgrp
+	$(CC) $(CFLAGS) $(WFLAGS)  -o reclinker ${COBJS} libpwdgrp/libpwdgrp.a -static
+
 install: 
 	ln -sf reclinker recdeleter
 	ln -sf reclinker reclinktester
@@ -18,3 +24,4 @@ install:
 
 clean:
 	rm -f *.o reclinker recdeleter reclinktester
+	$(MAKE) clean -C libpwdgrp
