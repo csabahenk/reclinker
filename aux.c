@@ -185,7 +185,7 @@ void usage(FILE* desc)
 	fprintf(desc,
 "Recursive linking/deleting utility, version %s. Usage:\n\
 \n\
-%s [-l|-d|-t] <from> <where> [<file>...]\n",VERSION,me);
+%s [-l|-d|-t] [options] <from> <where> [<file>...]\n",VERSION,me);
 }
 
 void showhelp()
@@ -273,7 +273,10 @@ gid_t parsegid(char* grpnam)
 	_gid_ = strtoul(grpnam, &p, 10);  /* Is it numeric? */
 	if (grpnam == p) 
 	{
-#ifdef __UCLIBC__
+/* #ifdef __UCLIBC__ 
+ that was an oooold uClibc, now I dare to forget about this issue
+*/
+#if 0
 /* It's a damn stupid bug in uClibc (I met with it in 0.9.21): if <group> 
 resides on the 0x*d-th row of /etc/group, then calling twice 
 getgrnam(<group>) with no intermediate usage of getgrnam results in a segfault

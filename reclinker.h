@@ -29,7 +29,7 @@ char *gnu_getcwd ();
 #define FATAL 1
 #define SMALLPROB 2
 #define BADOPT 3
-#define VERSION "0.3rc2"
+#define VERSION "0.3"
 #ifdef MAXSYMLINKS
 	#define MY_MAXSYMLINKS MAXSYMLINKS
 #else

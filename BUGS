@@ -1,4 +1,4 @@
-when used as recdeleter, if a subdir <from>/foo/ is processed, then the 
-removed thingy is reported as <where>/foo/ even if it's not a dir
-relativ linkingnel ha target dir alatti path-ban koztes 
-  symlink dir van az elbassza a symlink feloldasat
+When used as recdeleter, if a subdir <from>/foo/ is processed, then the 
+removed thingy is reported as <where>/foo/ even if it wasn't not a dir
+
+Code should be checked against memory leaks

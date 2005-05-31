@@ -1,24 +1,2 @@
-TODO:
-
-# cleaning up string fnc's
-- closing dirs immediately after reading them ?
-# fine-tune usage of free()
-- char[] vs. char*
-- checking value of mode 
-fix relativ linking bug
-
-***
-
-# dinamikusitas ellenorzese
-# ,,onlydir'' ertelmes hasznalata deletemode eseten
-# closing dirs...
-# proceeding on given filenames
-# korrekt MALLOC, REALLOC, my_realpath, my_readlink
-P linux-type indent, flush //-comments, correct includes (test by g++),
-f(void) instead of f(), is sizeof(char) needed? 
-# ertelmes error-szeru fnc
-# ertelmes test() fv
-# stating what only once, 
-# not so strict createdir <- I don't feel like finding out exactly what 
-  is to meant by "not so strict" (what to do when forcing?) so I skip it now...
-# when -r used and prefix is a subdir of where...
+Some plugin architecture could be made by which functions other than
+symlink() could be used for (pseudo-)mirroring.
