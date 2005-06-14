@@ -1,23 +1,20 @@
-//#define STARTLENGTH 100
-//#define MALLOC malloc
-//#define REALLOC realloc
-
-#include "reclinker.h"
 #include <string.h>
 
+#include "reclinker.h"
 
-#define movetonew(arr,newp) \
-arr->str = newp + (arr->str - arr->array); \
-arr->strmid = newp + (arr->strmid - arr->array); \
-arr->strend = newp + (arr->strend - arr->array); \
-arr->array = newp
+#define movetonew(arr,newp) { 					\
+	arr->str = newp + (arr->str - arr->array);		\
+	arr->strmid = newp + (arr->strmid - arr->array);	\
+	arr->strend = newp + (arr->strend - arr->array);	\
+	arr->array = newp;					\
+}
 
-int appendtomyarray(struct myarray *arr, char *string)
+int
+appendtomyarray(struct myarray *arr, char *string)
 {
 	size_t len = strlen(string);
 
-	if(arr->array + arr->length <  arr->strend + len + 1)
-	{
+	if (arr->array + arr->length <  arr->strend + len + 1) {
 		char *newp;
 		arr->length = 2 * arr->length + len + 1;
 	       	newp = (char *)REALLOC(arr->array,arr->length);
@@ -29,21 +26,21 @@ int appendtomyarray(struct myarray *arr, char *string)
 	return len;
 }
 
-int prependtomyarray(struct myarray *arr, char *string)
+int
+prependtomyarray(struct myarray *arr, char *string)
 {
 	size_t len = strlen(string);
-	if(arr->str < arr->array + len + 1)                                     
-	{                                                                       
+	if (arr->str < arr->array + len + 1) {
 		char *p, *q, *newp;
 		newp = (char *)REALLOC(arr->array,arr->length * 2 + len + 1);
 		movetonew(arr,newp);
 		p = arr->strend;	
 		q = arr->strend + arr->length + len + 1;
 		arr->strend = q;
-		while(1)
-		{
+		while (1) {
 			*q = *p;
-			if(p == arr->str) break;
+			if(p == arr->str)
+				break;
 			*q--;
 			*p--;
 		}
@@ -56,4 +53,3 @@ int prependtomyarray(struct myarray *arr, char *string)
 	arr->str = memcpy(arr->str,string,len);
 	return len;
 }
-	

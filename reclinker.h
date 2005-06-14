@@ -1,19 +1,22 @@
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
 #include <limits.h>
-#include <sys/param.h>
+#include <libgen.h>
+
 #include "config.h"
 
-
 #define SIZE(x) strlen(x)
-//#define S_IRWXAUGS S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID | S_ISVTX
+/* #define S_IRWXAUGS S_IRWXU | S_IRWXG | S_IRWXO | S_ISUID | S_ISGID | S_ISVTX */
 #define S_IRWXAUGS ~S_IFMT
 
 #if (defined __GNU_LIBRARY__ || defined __UCLIBC__)
@@ -56,7 +59,7 @@ int program_retval;
 char* from;
 char* fromorig;
 char* fromorep;
-//char* where;
+/* char* where; */
 struct myarray *where;
 char * what;
 char *whereorig;
@@ -73,8 +76,8 @@ int othermodeused;
 mode_t mask;
 int uid, gid;
 int Uid, Gid;
-//uid_t uid, gid;
-//uid_t Uid, Gid;
+/* uid_t uid, gid; */
+/* uid_t Uid, Gid; */
 char *usrname;
 char *grpname;
 char *Usrname;
@@ -95,13 +98,16 @@ int createdir();
 void defaults();
 /*void modeforcer();*/ /* now it's removed to reclinker.c, no declaration needed in header */
 void usage(FILE*);
-#define badopt \
-	fprintf(stderr,"Invalid invocation.\n"); \
-	usage(stderr); \
-	fprintf(stderr,"\nLearn more with -h !\n"); \
-	exit(BADOPT)
+#define badopt {					\
+	fprintf(stderr,"Invalid invocation.\n");	\
+	usage(stderr);					\
+	fprintf(stderr,"\nLearn more with -h !\n");	\
+	exit(BADOPT);					\
+}
+
 void showhelp();
 gid_t parsegid(char*);
+uid_t parseuid(char* usrnam);
 mode_t parsemode(char*);
 void cleanup_aux(int);
 char *my_realpath(char *str);
@@ -125,48 +131,59 @@ struct pathnode *strtopath(char *pathstr);
 char *pathtostr(struct pathnode *p);
 struct pathnode *relpath(struct pathnode *f, struct pathnode *t);
 char *str_relpath(char *f,char *t);
-//void printpath(struct pathnode *p);
+struct pathnode* palloc(void);
+void freepath(struct pathnode *p);
+/* void printpath(struct pathnode *p); */
 #define normalize(p) pathtostr(strtopath(p))
-//#define str_relpath(f,t) pathtostr(relpath(strtopath(f),strtopath(t))->next)
+/* #define str_relpath(f,t) pathtostr(relpath(strtopath(f),strtopath(t))->next) */
 #define initpath(r) r = (struct pathnode*)palloc(); r->name = strdup(""); r->next = NULL; r->prev = r
-#define addnode(p,s) \
-	p->next = (struct pathnode*)palloc(); \
-	(p->next)->prev = p; \
-	p = p->next; \
-	p->next = NULL; \
-	p->name = strdup(s)
+#define addnode(p,s) {					\
+	p->next = (struct pathnode*)palloc();		\
+	(p->next)->prev = p;				\
+	p = p->next;					\
+	p->next = NULL;					\
+	p->name = strdup(s);				\
+}
 
 /* What we use from myarray.c */
 
-#define initmyarray(arr) \
-	arr = (struct myarray*) MALLOC(sizeof (struct myarray)); \
-	arr->length = STARTLENGTH; \
-	arr->array = (char *) MALLOC(arr->length); \
-	arr->str = arr->array + arr->length/2; \
-	arr->strmid = arr->str; \
-	arr->strend = arr->str; \
-	*(arr->strend) = '\0'
+#define initmyarray(arr) {						\
+	arr = (struct myarray*) MALLOC(sizeof (struct myarray));	\
+	arr->length = STARTLENGTH;					\
+	arr->array = (char *) MALLOC(arr->length);			\
+	arr->str = arr->array + arr->length/2;				\
+	arr->strmid = arr->str;						\
+	arr->strend = arr->str;						\
+	*(arr->strend) = '\0';						\
+}
 
 int appendtomyarray(struct myarray *arr, char *string);
-#define appendasadir(arr, string) appendtomyarray(arr,"/"); appendtomyarray(arr,string)
+#define appendasadir(arr, string) {					\
+	appendtomyarray(arr,"/");					\
+	appendtomyarray(arr,string);					\
+}
 int prependtomyarray(struct myarray *arr, char *string);
-#define dupemyarray(arr,dupe) \
-	dupe = (struct myarray*) MALLOC(sizeof (struct myarray)); \
-	dupe->length = arr->length; \
-	dupe->array = (char *) MALLOC(dupe->length); \
-	dupe->str = dupe->array + (arr->str - arr->array); \
-	strcpy(dupe->str,arr->str); \
-	dupe->strmid = dupe->array + (arr->strmid - arr->array); \
-	dupe->strend = dupe->array + (arr->strend - arr->array) 
+#define dupemyarray(arr,dupe) {						\
+	dupe = (struct myarray*) MALLOC(sizeof (struct myarray));	\
+	dupe->length = arr->length;					\
+	dupe->array = (char *) MALLOC(dupe->length);			\
+	dupe->str = dupe->array + (arr->str - arr->array);		\
+	strcpy(dupe->str,arr->str);					\
+	dupe->strmid = dupe->array + (arr->strmid - arr->array);	\
+	dupe->strend = dupe->array + (arr->strend - arr->array);	\
+} 
 	
-#define resetmyarray(arr) \
-	*(arr->str) = '\0'; \
-	arr->strmid = arr->str; \
-	arr->strend = arr->str
+#define resetmyarray(arr) {			\
+	*(arr->str) = '\0';			\
+	arr->strmid = arr->str;			\
+	arr->strend = arr->str;			\
+}
 
-#define freemyarray(arr) \
-	free(arr->array); \
-	free(arr)
+#define freemyarray(arr) {			\
+	free(arr->array);			\
+	free(arr);				\
+}
+
 
 /* get_line_from_file.c */
 

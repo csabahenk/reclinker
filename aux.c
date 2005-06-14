@@ -1,14 +1,15 @@
-#include "reclinker.h"
 #include <stdarg.h>
 
+#include "reclinker.h"
+
 #ifndef GNU 
-char *gnu_getcwd ()
+char *
+gnu_getcwd ()
 {
 	size_t size = 100;
 	void * MALLOC (size_t);
 
-	while (1)
-	{
+	while (1) {
 		char *buffer = (char *) MALLOC (size);
 		if (getcwd (buffer, size) == buffer)
 			return buffer;
@@ -21,30 +22,33 @@ char *gnu_getcwd ()
 #endif
 
 /* Erases "reduce_with" from "from" if it is an initial segment */
-char *strreduce(char *from, const char *reduce_with)
+char *
+strreduce(char *from, const char *reduce_with)
 {
-	while(*reduce_with == *from && *reduce_with != '\0')
-	{
+	while(*reduce_with == *from && *reduce_with != '\0') {
 		*reduce_with++;
 		*from++;
 	}
-	if(*reduce_with == '\0') return strdup(from);
+	if(*reduce_with == '\0')
+		return strdup(from);
 	return NULL;
 }
 
-int strsubtest(char *from, const char *reduce_with)
+int
+strsubtest(char *from, const char *reduce_with)
 {
-	while(*reduce_with == *from && *reduce_with != '\0')
-	{
+	while(*reduce_with == *from && *reduce_with != '\0') {
 		*reduce_with++;
 		*from++;
 	}
-	if(*reduce_with == '\0') return 1;
+	if(*reduce_with == '\0')
+		return 1;
 	return 0;
 }
 
 
-void * xmalloc (size_t size)
+void *
+xmalloc (size_t size)
 {
 	register void *value = (void*)malloc(size);
 	if (value == 0)
@@ -52,7 +56,8 @@ void * xmalloc (size_t size)
 	return value;
 }
 
-void * xrealloc (char* buf,size_t size)
+void *
+xrealloc (char* buf,size_t size)
 {
 	register void *value = (void*)realloc(buf,size);
 	if (value == 0)
@@ -60,13 +65,15 @@ void * xrealloc (char* buf,size_t size)
 	return value;
 }
 
-void error(char *msg,...)
+void
+error(char *msg,...)
 {
 	va_list vl;
 	char *s;
 
 	va_start(vl,msg);
-	while(s = va_arg(vl, char *)) fprintf(stderr,s);
+	while ((s = va_arg(vl, char *)))
+		fprintf(stderr,s);
 	va_end(vl);
 
 	fprintf(stderr,": ");
@@ -74,35 +81,33 @@ void error(char *msg,...)
 	exit(FATAL);
 }
 
-void chowner()
+void
+chowner()
 {
 	if(uid == -1  && gid == -1)
 		return;
 
-	if (lchown(where->str,uid,gid) == 0)  /*lchown was not mentioned in glibc docs, but it *is* */
-	{
-		if (verbosity >= 2)
-		{ 
+	if (lchown(where->str,uid,gid) == 0) {
+		  /*lchown was not mentioned in glibc docs, but it does exist */
+		if (verbosity >= 2) { 
 			printf("%s%s: setting ",whereorep,where->strmid);
 			if (usrname != NULL)  
-				{printf("uid to %s ", usrname);}
+				printf("uid to %s ", usrname);
 			if (usrname != NULL && grpname != NULL) 
-				{printf( "and ");}
+				printf( "and ");
 			if (grpname != NULL) 
-				{printf("gid to %s ", grpname);}
+				printf("gid to %s ", grpname);
 			printf("\n");      
 		}	
-	}
-	else 
-	{ 
+	} else { 
 		program_retval = SMALLPROB;
 		fprintf(stderr,"%s%s: setting ",whereorep,where->strmid);
 		if (usrname != NULL)  
-			{fprintf(stderr, "uid to %s ", usrname);}
+			fprintf(stderr, "uid to %s ", usrname);
 		if (usrname != NULL && grpname != NULL) 
-			{fprintf(stderr, "and ");}
+			fprintf(stderr, "and ");
 		if (grpname != NULL) 
-			{fprintf(stderr, "gid to %s ", grpname);}
+			fprintf(stderr, "gid to %s ", grpname);
 		fprintf(stderr,"failed\n");      
 	}	
 }
@@ -111,15 +116,14 @@ void chowner()
  * main() and linker() uses this)
  */
 
-int createdir()
+int
+createdir()
 {
 	int retval = mkdir(where->str, mode);
 	int errno_saved = errno;
 		
-	if(retval == 0)	
-	{  
-		if(verbosity >= 1)
-		{
+	if(retval == 0)	{  
+		if(verbosity >= 1) {
 			printf("%s%s/",whereorep,where->strmid);
 			if (verbosity >= 2) 
 				printf(": dir created with mode %o",mode & ~mask);
@@ -128,28 +132,20 @@ int createdir()
 
 		chowner();
 			
-	}
-	else if(errno == EEXIST)
-	{
+	} else if (errno == EEXIST) {
 		struct stat to_createstat;
 		stat(where->str, &to_createstat);
-		if((to_createstat.st_mode & S_IFMT) == S_IFDIR)
-		{
-			if(verbosity >= 2)
-			{
+		if ((to_createstat.st_mode & S_IFMT) == S_IFDIR) {
+			if(verbosity >= 2) {
 				printf("%s%s/: dir already exists\n",whereorep,where->strmid);
 			} 
-		}	
-		else 
-		{
-//			uerror("the dir cannot be created");
+		} else {
+		/*	uerror("the dir cannot be created");  */
 			errno = errno_saved;
 			return -2;
 		}
-	}
-	else 
-	{
-//		uerror("the dir cannot be created");
+	} else {
+	/*	uerror("the dir cannot be created"); */
 		errno = errno_saved;
 		return -2;
 	}
@@ -157,16 +153,14 @@ int createdir()
  	return retval;
 }  
 
-
-
-
-void defaults()
+void
+defaults()
 {
 	program_retval = SUCCESS;
 	verbosity=1;
 	force=0;
 	rel=0;
-//	mode = S_IRWXAUGS; 
+	/* mode = S_IRWXAUGS; */
 	onlydir=0;
 	deletemode=0;
 	firstmodeused=0;
@@ -180,7 +174,8 @@ void defaults()
 
 
 
-void usage(FILE* desc)
+void
+usage(FILE* desc)
 {
 	fprintf(desc,
 "Recursive linking/deleting utility, version %s. Usage:\n\
@@ -188,7 +183,8 @@ void usage(FILE* desc)
 %s [-l|-d|-t] [options] <from> <where> [<file>...]\n",VERSION,me);
 }
 
-void showhelp()
+void
+showhelp()
 {
 	printf(
 "\n\
@@ -264,15 +260,15 @@ options used)\n\
 
 
 
-gid_t parsegid(char* grpnam)
+gid_t
+parsegid(char* grpnam)
 {
 	struct group* grp;
 	char *p = NULL;
 	gid_t _gid_;
 
 	_gid_ = strtoul(grpnam, &p, 10);  /* Is it numeric? */
-	if (grpnam == p) 
-	{
+	if (grpnam == p) {
 /* #ifdef __UCLIBC__ 
  that was an oooold uClibc, now I dare to forget about this issue
 */
@@ -285,87 +281,91 @@ getgrnam(<group>) with no intermediate usage of getgrnam results in a segfault
 #endif
 		grp = getgrnam(grpnam);
 	}
-	else grp = getgrgid(_gid_);
+	else
+		grp = getgrgid(_gid_);
 
-	if (grp == NULL) return -1;
+	if (grp == NULL)
+		return -1;
 	return grp->gr_gid;  
 }
 
 	
-uid_t parseuid(char* usrnam) /* based on Busybox code */
+uid_t
+parseuid(char* usrnam) /* based on Busybox code */
 {
 	struct passwd* usr;
 	char *p = NULL;
 	uid_t _uid_; 
 
 	_uid_ = strtoul(usrnam, &p, 10);  /* Is it numeric? */
-	if (usrnam == p) usr = getpwnam(usrnam);
-	else usr = getpwuid(_uid_);
+	if (usrnam == p)
+		usr = getpwnam(usrnam);
+	else
+		usr = getpwuid(_uid_);
 
-	if (usr == NULL) return -1;
+	if (usr == NULL)
+		return -1;
 	return usr->pw_uid;  
 }
 
 
-mode_t parsemode(char* modestring)
+mode_t
+parsemode(char* modestring)
 {
 	char* modestring_orig = modestring;
 	int i=0;
 
-	while (*modestring != '\0')
-	{
-		if((i++ > 3) || (*modestring < '0') || (*modestring++ > '7')) goto badmode;
+	while (*modestring != '\0') {
+		if((i++ > 3) || (*modestring < '0') || (*modestring++ > '7'))
+			goto badmode;
 	}
 
 	return strtol(optarg,NULL,8);
 	
-	badmode:
-	  fprintf(stderr,"%s: invalid mode value\n", modestring_orig);
-	  exit(BADOPT);
-
+badmode:
+	fprintf(stderr,"%s: invalid mode value\n", modestring_orig);
+	exit(BADOPT);
 }
 
 
 
-void cleanup_aux(int isnew)
+void
+cleanup_aux(int isnew)
 {
-	if(isnew == 0)
-	{
+	if(isnew == 0) {
 		int rmsuc = rmdir(where->str);
-		if(rmsuc == 0)
-		{
+		if(rmsuc == 0) {
 			if(verbosity >=2)
 				printf("%s removed\n",whereorig);
-		}
-		else
-		{	
+		} else {	
 			error("cleanup failed",whereorig,NULL);    
 		}
 	}
 }
 
-char *my_realpath(char *str)
+char *
+my_realpath(char *str)
 {
 	char *aux = (char *)MALLOC(PATH_MAX+1);
 	aux = (char *)realpath(str,aux); /* why do get I warnings if I omit the 
 					    (char *) constraint ??? */
-	if(aux == NULL) return NULL;
+	if (aux == NULL)
+		return NULL;
 	return (char *)REALLOC(aux,strlen(aux) + 1);
 }
 
-char * my_readlink (const char *filename)
+char *
+my_readlink (const char *filename)
 /* based on sample code of the glibc manual */
 {
 	int size = STARTLENGTH;
 	
-	while (1)
-	{
+	while (1) {
 		char *buffer = (char *) MALLOC (size);
 		int nchars = readlink (filename, buffer, size);
 		if (nchars < 0)
 			return NULL;
-		if (nchars < size)
-		{
+		if (nchars < size) {
 			*(buffer + nchars)  = '\0';
 			return buffer;
 		}
@@ -376,7 +376,8 @@ char * my_readlink (const char *filename)
 
 /* Now comes stuff for deciding whether a symlink points to file. */
 
-char *soft_realpath(const char *filename)
+char *
+soft_realpath(const char *filename)
 /* the same as my_realpath, it just gives a symlinkless for broken
  * symlinks as well (symlinkess, except for the symlink proceeded on 
  */
@@ -385,10 +386,13 @@ char *soft_realpath(const char *filename)
 	
 	fname = strdup(filename);
 
-	if((bname = (char *)basename(fname)) == NULL) return NULL;
-	if((dname = (char *)dirname(fname)) == NULL) return NULL;
-	if((rdname = (char *)my_realpath(dname)) == NULL) return NULL;	
-	//free(dname);
+	if ((bname = (char *)basename(fname)) == NULL)
+		return NULL;
+	if ((dname = (char *)dirname(fname)) == NULL)
+		return NULL;
+	if ((rdname = (char *)my_realpath(dname)) == NULL)
+		return NULL;	
+	/* free(dname); */
 	
 	finalname = (char *)MALLOC(strlen(rdname) + strlen(bname) + 2);
 
@@ -397,44 +401,45 @@ char *soft_realpath(const char *filename)
 
 	strcat(finalname,"/");
 	strcat(finalname,bname);
-	//free(bname);
+	/* free(bname); */
 
 	return strdup(finalname);
 }
 
 				
-char *canon_readlink(const char *filename)
+char *
+canon_readlink(const char *filename)
 /* gives the soft_realpath of the target of a symlink */
 /* freeing should also happen if a we return NULL due to a failed function call,
  * ehh...
  */
-
 {
 	char *pretarget, *target, *rtarget;
 
-	if((pretarget = (char *)my_readlink(filename)) == NULL) return NULL;
-	if((*pretarget) == '/')
-	{
+	if ((pretarget = (char *)my_readlink(filename)) == NULL)
+		return NULL;
+	if ((*pretarget) == '/') {
 		target = pretarget;
-	}
-	else
-	{		
+	} else {		
 		char *rname, *dname;
 
-		if((rname = (char *)soft_realpath(filename)) == NULL) return NULL;
-		if((dname = (char *)dirname(rname)) == NULL) return NULL;
-		//free(rname);
+		if ((rname = (char *)soft_realpath(filename)) == NULL)
+			return NULL;
+		if ((dname = (char *)dirname(rname)) == NULL)
+			return NULL;
+		/* free(rname); */
 	
 		target = (char *)MALLOC(strlen(dname) + strlen(pretarget) + 2);
 		strcpy(target,dname);
-		//free(dname);	
+		/* free(dname);	*/
 	
 		strcat(target,"/");
 		strcat(target,pretarget);
 		free(pretarget);
 	}
 
-	if((rtarget = (char *)soft_realpath(target)) == NULL) return NULL;
+	if ((rtarget = (char *)soft_realpath(target)) == NULL)
+		return NULL;
 	free(target);
 	
 	return strdup(rtarget);
@@ -446,12 +451,14 @@ int rec_pointto(char *linkname, char *filename)
 	int i;
 
 	if((currpos = (char *)soft_realpath(linkname)) == NULL ||
-	   (rname = (char *)soft_realpath(filename)) == NULL) return 0;
+	   (rname = (char *)soft_realpath(filename)) == NULL)
+		return 0;
 
-	for(i=0;i < MY_MAXSYMLINKS; i++)
-	{
-		if(strcmp(currpos,rname) == 0) return 1;
-		if((newpos = (char *)canon_readlink(currpos)) == NULL) return 0;
+	for (i=0; i < MY_MAXSYMLINKS; i++) {
+		if (strcmp(currpos,rname) == 0)
+			return 1;
+		if ((newpos = (char *)canon_readlink(currpos)) == NULL)
+			return 0;
 		free(currpos);
 		currpos = newpos;
 	}

@@ -21,15 +21,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-//#include <stdio.h>
-//#include "libbb.h"
 #include "reclinker.h"
-
 
 /* get_line_from_file() - This function reads an entire line from a text file
  * up to a newline. It returns a malloc'ed char * which must be stored and
  * free'ed  by the caller. */
-extern char *get_line_from_file(FILE *file,char sepchar)
+extern char *
+get_line_from_file(FILE *file,char sepchar)
 {
 	static const int GROWBY = 80; /* how large we will grow strings by */
 
@@ -47,7 +45,7 @@ extern char *get_line_from_file(FILE *file,char sepchar)
 			linebuf = REALLOC(linebuf, linebufsz += GROWBY);
 		if (ch == sepchar) ch = '\0';
 		linebuf[idx++] = (char)ch;
-//		if (ch == '\n' || ch == '\0')
+		/* if (ch == '\n' || ch == '\0') */
 	    if (ch == '\0')
 			break;
 	}
@@ -58,8 +56,6 @@ extern char *get_line_from_file(FILE *file,char sepchar)
 	linebuf[idx] = 0;
 	return linebuf;
 }
-
-//main(){}
 
 /* END CODE */
 /*
