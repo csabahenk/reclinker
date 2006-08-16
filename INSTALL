@@ -1,0 +1,10 @@
+Compile and install:
+
+sh make.sh
+sh make.sh install
+
+Compile a static binary:
+
+sh make.sh CFLAGS=-static
+
+If you compile staticly against glibc, also consult the README.glibc file.

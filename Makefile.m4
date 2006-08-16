@@ -8,14 +8,14 @@ CSRC = aux.c reclinker.c pathparse.c myarray.c get_line_from_file.c
 
 COBJS = ${CSRC:.c=.o}
 
+ifelse(OS, Linux,
+ifdef USE_BB_LIBPWDGRP
+LIBPWDGRP=	libpwdgrp.a
+endif
+)
+
 reclinker: ${COBJS} 
-	$(CC) $(CFLAGS) $(WFLAGS) -o $@ ${COBJS}
-
-pwdgrp:
-	$(MAKE) -C libpwdgrp
-
-glibc-static: ${COBJS} pwdgrp
-	$(CC) $(CFLAGS) $(WFLAGS)  -o reclinker ${COBJS} libpwdgrp/libpwdgrp.a -static
+	$(CC) $(CFLAGS) $(WFLAGS) -o $@ ${COBJS} ${LIBPWDGRP}
 
 install: 
 	ln -sf reclinker recdeleter
@@ -24,4 +24,3 @@ install:
 
 clean:
 	rm -f *.o reclinker recdeleter reclinktester
-	$(MAKE) clean -C libpwdgrp

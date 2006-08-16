@@ -1,0 +1,19 @@
+glibc has problems with proper static compilation of some functions.
+
+You hit this when you see warnings like
+
+aux.o: In function `parsegid':
+aux.c:(.text+0x5ff): warning: Using 'getgrgid' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+
+You can get around this by bringing over libpwdgrp from Busybox
+(http://busybox.net).
+
+Fetch busybox and compile it with "CONFIG_USE_BB_PWD_GRP=yes" (settable via
+
+Login/Password Management Utilities / Use internal password and group functions rather than system functions
+
+in menuconfig). Then copy libpwdgrp/libpwdgrp.a here, and use the
+USE_BB_LIBPWDGRP=1 setting when compiling reclinker.
+
+If you wonder about the background of this phenomenon, read the associated help
+text in menuconfig.
