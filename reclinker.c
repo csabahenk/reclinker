@@ -137,7 +137,7 @@ removedir()
 }	
 
 
-#define dirsuck {						\
+#define dirsuck() {						\
 	fprintf(stderr,"%s%s/: ", whereorep,where->strmid);	\
   	perror("dir cannot be created");			\
 	program_retval = SMALLPROB;				\
@@ -168,7 +168,7 @@ linker()
 		cdrv = createdir();
 		if (cdrv == -2) {
 			if (!force) {
-				dirsuck;
+				dirsuck();
 				return 0;
 			}
 		}
@@ -187,7 +187,7 @@ linker()
 		}
 		if (cdrv == -2) {
 		 	if (createdir() == -2) {
-				dirsuck;
+				dirsuck();
 				return 0;
 			}		
 			else
@@ -732,10 +732,10 @@ act_as_reclinker(int argc, char** argv)
 			} else
 				isnew = createdir();
 			if (isnew == -2) {
-				dirsuck;
+				dirsuck();
 			}		
 		} else {
-			dirsuck;
+			dirsuck();
 		}
 	}
 	if (chdir(from) != 0) {
