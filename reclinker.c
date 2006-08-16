@@ -8,6 +8,7 @@ void (*wantmydose)(struct pathnode *root);
 struct myarray *prefix;
 char *prefixorig = NULL;
 char *whereabs;
+char *fromabs;
 
 int forceproperprefix = 0;
 
@@ -376,8 +377,9 @@ reclinker()
 	
 	while ((pn = pn->next)) {
 		/* int pregrowth; */
-		int postgrowth;
-	
+		int postgrowth, prune = 0;
+		char *aux, *realwhere = NULL;
+
 		what = pn->name;
 		if (strcmp(what,".") == 0 || strcmp(what,"..") == 0)
 			continue;
@@ -386,8 +388,27 @@ reclinker()
 		appendasadir(where,what);
 		if (deletemode != 1)
 			appendasadir(prefix,what);
-		
-		if (preselfcall()) {
+
+		/*
+		 * We don't descend into directories which reside inside
+		 * the mirrored tree
+		 */
+		realwhere = my_realpath(where->str);
+		if (realwhere)
+			aux = strreduce(realwhere, fromabs);
+		if (aux != NULL && (*aux == '\0' || *aux == '/')) {
+			struct stat astat;
+
+			stat(realwhere, &astat);
+			if ((astat.st_mode & S_IFMT) == S_IFDIR) {
+				prune = 1;
+				if (verbosity >= 2)
+					printf("pruning %s%s as it's contained in original copy\n", whereorep, where->strmid);
+			}
+		}
+		free(aux);
+
+		if (! prune && preselfcall()) {
 		/* preselfcall is a function pointer, may point to
 		 * linker, removelink or test */
 			if (chdir(what) == 0) {
@@ -395,8 +416,7 @@ reclinker()
 						struct stat whatstat;
 						lstat(where->str,&whatstat);
 						if (forceproperprefix || (whatstat.st_mode & S_IFMT) == S_IFLNK) {
-							char *realwhere, *abspref, *pathbetween; 
-							realwhere = my_realpath(where->str);
+							char *abspref, *pathbetween; 
 
 							abspref = (char *)MALLOC(strlen(whereabs) + strlen(prefixorig) + strlen(where->strmid) + 2);
 							strcpy(abspref,whereabs);
@@ -411,7 +431,6 @@ reclinker()
 							pathbetween = str_relpath(realwhere,abspref);	
 							appendtomyarray(prefix,pathbetween);
 							
-							free(realwhere);
 							free(abspref);	
 							free(pathbetween);
 						}
@@ -419,6 +438,7 @@ reclinker()
 							prependtomyarray(prefix,"../");
 				}
 
+				free(realwhere);
 				reclinker();
 				
 				if (chdir("..") == 0)	{
@@ -446,11 +466,13 @@ reclinker()
 					error("can't go back to parent dir",what,NULL);
 					/*Unlikely error*/		
 			} else {
+				free(realwhere);
 				program_retval = SMALLPROB;
 				fprintf(stderr,"%s%s: ",fromorep,where->strmid);
 				perror("unable to enter dir");
 			}
-		}
+		} else
+			free(realwhere);
 		backabit(where,postgrowth);
 		if (deletemode != 1)
 			backabit(prefix,postgrowth);
@@ -594,6 +616,7 @@ main(int argc, char **argv)
 		from = normalize(strcat(aux,fromorig));	
 	}
 	free(aux);
+	fromabs = my_realpath(from);
 
 	switch (deletemode) {
 	case 0:
@@ -692,7 +715,6 @@ act_as_reclinker(int argc, char** argv)
 	mask = umask (0);
 	umask (mask);	
 
-	currdir = (char*) GETCWD(NULL,0);
 	isnew = createdir();
 	if (isnew == -2) {
 		/* Bah. I couldn't help putting here this block which is taken
@@ -727,7 +749,8 @@ act_as_reclinker(int argc, char** argv)
 	 * files in source dir with symlinks
 	 */
 	whereabs = my_realpath(where->str);
-	aux = strreduce(whereabs,GETCWD(NULL,0));
+	currdir = (char*) GETCWD(NULL,0);
+	aux = strreduce(whereabs, currdir);
 	if (aux != NULL && (*aux == '\0' || *aux == '/')) { 
 		/* Eh, and if from is subdir of where, ain't that a problem?? */
 		fprintf(stderr,"Target dir cannot be subdir of source dir\n");
@@ -738,6 +761,7 @@ act_as_reclinker(int argc, char** argv)
 		cleanup_aux(isnew);
 		exit(BADOPT);
 	}
+	free(currdir);
 	free(aux);
  
 	initprefix;

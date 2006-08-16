@@ -169,10 +169,11 @@ pathtostr(struct pathnode *p)
 	/* Terminate the result string.  */
 	/* *wp = '\0'; */ /* this version puts a closing "/" to the end */
 	/* *(--wp) = '\0'; */ /* ... and this doesn't */
-	if (--wp == result)
-		*(++wp) = '\0';
+	if (wp == result || wp == result + 1)
+		wp = result;
 	else
-		*wp = '\0';
+		--wp;	
+	*wp = '\0';
 	/* Resize memory to the optimal size.  */
 	return (char *)REALLOC(result, wp - result + 1);
 }

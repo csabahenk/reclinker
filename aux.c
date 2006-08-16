@@ -347,11 +347,18 @@ char *
 my_realpath(char *str)
 {
 	char *aux = (char *)MALLOC(PATH_MAX+1);
-	aux = (char *)realpath(str,aux); /* why do get I warnings if I omit the 
-					    (char *) constraint ??? */
-	if (aux == NULL)
+	char *aux2 = (char *)realpath(str,aux); /* why do get I warnings if I omit the 
+					           (char *) constraint ??? */
+	char *aux3;
+
+	if (aux2 == NULL) {
+		free(aux);
 		return NULL;
-	return (char *)REALLOC(aux,strlen(aux) + 1);
+	}
+	aux3 = strdup(aux2);
+	free(aux);
+
+	return aux3;
 }
 
 char *
