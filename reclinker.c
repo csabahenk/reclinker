@@ -690,7 +690,7 @@ void
 act_as_reclinker(int argc, char** argv)
 {
 	char* currdir; 
-	char* aux;
+	char* aux = NULL;
 	int isnew;
 
 	if (firstmodeused) {
@@ -731,13 +731,13 @@ act_as_reclinker(int argc, char** argv)
 				perror("forcing creation failed");
 			} else
 				isnew = createdir();
-			if (isnew == -2) {
-				dirsuck();
-			}		
-		} else {
-			dirsuck();
+			if (isnew != -2)
+				goto goon;
 		}
+		fprintf(stderr, "creating target directory failed\n");
+		exit(FATAL);
 	}
+goon:
 	if (chdir(from) != 0) {
 		fprintf(stderr,"%s: ",fromorig);
 		perror("can't enter source directory");
@@ -750,7 +750,8 @@ act_as_reclinker(int argc, char** argv)
 	 */
 	whereabs = my_realpath(where->str);
 	currdir = (char*) GETCWD(NULL,0);
-	aux = strreduce(whereabs, currdir);
+	if (whereabs)
+		aux = strreduce(whereabs, currdir);
 	if (aux != NULL && (*aux == '\0' || *aux == '/')) { 
 		/* Eh, and if from is subdir of where, ain't that a problem?? */
 		fprintf(stderr,"Target dir cannot be subdir of source dir\n");
