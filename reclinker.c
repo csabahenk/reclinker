@@ -353,38 +353,49 @@ nextinpath(struct pathnode *root)
 }
 
 
-#define backabit(arr,n) {	\
+#define backabit(arr,n)		\
+{				\
 	arr->strend -= n;	\
 	*(arr->strend) = '\0';	\
 }
 
-#define forthabit(arr,n) arr->str += n 	
-	
-/* A recursive function to walk throgh all the source dir tree and
+#define forthabit(arr,n) arr->str += n
+
+struct pathstate {
+	struct myarray *prefix;
+	struct pathnode *root;
+	struct pathnode *pn;
+	int postgrowth;
+};
+
+
+/*
+ * A recursive function to walk throgh all the source dir tree and
  * calling linker on the certain files
  */
-
 void
 reclinker()
 {
-	struct myarray *prefixsave = NULL;
+	/*
+	 * State information which is kept around over recursive calls
+	 * is quarantined in pstate
+	 */
+	struct pathstate pstate;
+	memset(&pstate, 0, sizeof(pstate));
 
-	struct pathnode *root, *pn;
+	initpath(pstate.root);
+	wantmydose(pstate.root);
+	pstate.pn = pstate.root;
 
-	initpath(root);
-	wantmydose(root);
-	pn = root;
-	
-	while ((pn = pn->next)) {
-		/* int pregrowth; */
-		int postgrowth, prune = 0;
+	while ((pstate.pn = pstate.pn->next)) {
+		int prune = 0;
 		char *aux, *realwhere = NULL;
 
-		what = pn->name;
+		what = pstate.pn->name;
 		if (strcmp(what,".") == 0 || strcmp(what,"..") == 0)
 			continue;
 
-		postgrowth = strlen(what) + 1;
+		pstate.postgrowth = strlen(what) + 1;
 		appendasadir(where,what);
 		if (deletemode != 1)
 			appendasadir(prefix,what);
@@ -416,22 +427,21 @@ reclinker()
 						struct stat whatstat;
 						lstat(where->str,&whatstat);
 						if (forceproperprefix || (whatstat.st_mode & S_IFMT) == S_IFLNK) {
-							char *abspref, *pathbetween; 
+							char *abspref, *pathbetween;
 
 							abspref = (char *)MALLOC(strlen(whereabs) + strlen(prefixorig) + strlen(where->strmid) + 2);
 							strcpy(abspref,whereabs);
 							strcat(abspref,"/");
 							strcat(abspref,prefixorig);
 							strcat(abspref,where->strmid);
-							if (!forceproperprefix) {
-								dupemyarray(prefix,prefixsave);
-							}
+							if (!forceproperprefix)
+								dupemyarray(prefix, pstate.prefix);
 
 							resetmyarray(prefix);
-							pathbetween = str_relpath(realwhere,abspref);	
+							pathbetween = str_relpath(realwhere,abspref);
 							appendtomyarray(prefix,pathbetween);
-							
-							free(abspref);	
+
+							free(abspref);
 							free(pathbetween);
 						}
 						else
@@ -440,31 +450,31 @@ reclinker()
 
 				free(realwhere);
 				reclinker();
-				
+
 				if (chdir("..") == 0)	{
 					if (rel) {
-						if (prefixsave == NULL) {
+						if (pstate.prefix == NULL) {
 							forthabit(prefix,3);
 						} else {
-							freemyarray(prefix);	
-							prefix = prefixsave;
+							freemyarray(prefix);
+							prefix = pstate.prefix;
 						}
 					}
 					/* If we want to set the mode of
-					 * created dirs arbitrarily, we have to 
+					 * created dirs arbitrarily, we have to
 					 * do it here, after recursive calls of
- 					 * reclinker() are over, thus avioding 
+ 					 * reclinker() are over, thus avioding
 					 * potential read/write conflicts of
 					 * children reclinker()'s
 					 */
-					postselfcall(); 
-					/* It's a function pointer which may 
+					postselfcall();
+					/* It's a function pointer which may
 					 * point to modeforcer, removedir or
 					 * noop
 					 */
 				} else
 					error("can't go back to parent dir",what,NULL);
-					/*Unlikely error*/		
+					/*Unlikely error*/
 			} else {
 				free(realwhere);
 				program_retval = SMALLPROB;
@@ -473,11 +483,11 @@ reclinker()
 			}
 		} else
 			free(realwhere);
-		backabit(where,postgrowth);
+		backabit(where, pstate.postgrowth);
 		if (deletemode != 1)
-			backabit(prefix,postgrowth);
+			backabit(prefix, pstate.postgrowth);
 	}
-	freepath(root);
+	freepath(pstate.root);
 }
 
 
