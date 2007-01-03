@@ -132,7 +132,13 @@ createdir()
 
 		chowner();
 			
-	} else if (errno == EEXIST) {
+	} else if (errno == EEXIST 
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
+    defined(__DragonFly__)
+	           /* work around weird BSD errno upon mkdir("/") */
+                   || errno == EISDIR
+#endif
+ 	          ) {
 		struct stat to_createstat;
 		stat(where->str, &to_createstat);
 		if ((to_createstat.st_mode & S_IFMT) == S_IFDIR) {
