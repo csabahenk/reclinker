@@ -12,6 +12,7 @@
 #include <grp.h>
 #include <limits.h>
 #include <libgen.h>
+#include <assert.h>
 
 #include "config.h"
 

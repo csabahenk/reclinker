@@ -117,20 +117,21 @@ relpath(struct pathnode *f, struct pathnode *t)
 	struct pathnode *p = f;
 	struct pathnode *q = t;	
 	struct pathnode *r;	
-	struct pathnode *root;	
+	struct pathnode root;	
 
 	/* We deal only with proper path-roots */
 	if (f == NULL || t == NULL)
 		return NULL;
 	
-	initpath(root);
-
-	while (p->next != NULL && q->next != NULL && strcmp((p->next)->name,(q->next)->name) == 0) {
+	while (p->next != NULL &&
+	       q->next != NULL &&
+	       strcmp((p->next)->name, (q->next)->name) == 0) {
 		p = p->next;
 		q = q->next;
 	}
-	
-	r = root;
+
+	root.next = NULL;
+	r = &root;
 	while (p->next != NULL) {
 		r->next = palloc();
 		(r->next)->prev = r;
@@ -141,7 +142,20 @@ relpath(struct pathnode *f, struct pathnode *t)
 	}
 	
 	pathcopy(q->next,r);
-	return root;
+	if (! root.next) {
+		/*
+		 * The two paths are the same, the relative path in between
+		 * is NULL.
+		 * We rather add a simple dot component and refrain from using
+		 * NULL paths.
+		 */
+		r = palloc();
+		root.next = r;
+		r->name = strdup(".");
+		r->next = NULL;
+	}
+	root.next->prev = NULL;
+	return root.next;
 }
 
 char *
@@ -152,6 +166,8 @@ pathtostr(struct pathnode *p)
 	char *result = (char *) MALLOC (allocated);
 	char *wp;
 	char *newp;
+
+	assert(p);
 
 	wp = result;
 	for (; p != NULL; p = p->next) {
@@ -166,14 +182,14 @@ pathtostr(struct pathnode *p)
 		wp = memcpy (wp, p->name, len) + len; /* + 1; */
 		*wp++ = DIRSEP;
 	}
-	/* Terminate the result string.  */
-	/* *wp = '\0'; */ /* this version puts a closing "/" to the end */
-	/* *(--wp) = '\0'; */ /* ... and this doesn't */
-	if (wp == result || wp == result + 1)
-		wp = result;
+	/*
+         * strip trailing slash unless we're at root (ie., whole pathname is
+         * nothing but a slash).
+         */
+	if (--wp == result)
+		*(++wp) = '\0';
 	else
-		--wp;	
-	*wp = '\0';
+		*wp = '\0';
 	/* Resize memory to the optimal size.  */
 	return (char *)REALLOC(result, wp - result + 1);
 }
@@ -193,7 +209,7 @@ str_relpath(char *f,char *t)
 	q = strtopath(t);
 	r = relpath(strtopath(f),strtopath(t));
 
-	w = pathtostr(r->next);
+	w = pathtostr(r);
 
 	freepath(p);
 	freepath(q);
