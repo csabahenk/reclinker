@@ -179,7 +179,7 @@ pathtostr(struct pathnode *p)
 			wp = newp + (wp - result);
 			result = newp;
 		}
-		wp = memcpy (wp, p->name, len) + len; /* + 1; */
+		wp = (char *)memcpy(wp, p->name, len) + len; /* + 1; */
 		*wp++ = DIRSEP;
 	}
 	/*

@@ -2,7 +2,7 @@ PREFIX=/usr/local
 
 CC=gcc
 
-#WFLAGS=-Wall
+CFLAGS=-Wall -g -O
 
 CSRC = misc.c reclinker.c pathparse.c myarray.c get_line_from_file.c
 

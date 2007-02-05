@@ -126,7 +126,8 @@ createdir()
 		if(verbosity >= 1) {
 			printf("%s%s/",whereorep,where->strmid);
 			if (verbosity >= 2) 
-				printf(": dir created with mode %o",mode & ~mask);
+				printf(": dir created with mode %o",
+			               (int)(mode & ~mask));
 	  	  	putchar('\n');	
 		}	
 

@@ -21,7 +21,7 @@ appendtomyarray(struct myarray *arr, char *string)
 		movetonew(arr,newp);
 	}
 			
-	arr->strend = memcpy(arr->strend,string,len) + len;
+	arr->strend = (char *)memcpy(arr->strend,string,len) + len;
 	*(arr->strend) = '\0';
 	return len;
 }

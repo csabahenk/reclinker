@@ -223,7 +223,8 @@ modeforcer()
 
 	if (chmod(where->str,mode_forced) == 0) {
 		if (verbosity >= 2) 
- 			printf("%s%s/: mode set to %o\n",whereorep,where->strmid, mode_forced);
+ 			printf("%s%s/: mode set to %o\n", whereorep,
+		               where->strmid, (int)mode_forced);
 	} else {	
 		program_retval = SMALLPROB;
  		fprintf(stderr,"%s%s/: ",whereorep,where->strmid); 
@@ -665,6 +666,10 @@ main(int argc, char **argv)
 					break;
 				case '0':
 					sepchar = '\0';
+					break;
+				default:
+					fprintf(stderr, "stdin parsing mode sigill is weird\n");
+					abort();
 				}	
 				while ((line = get_line_from_file(stdin,sepchar))) {
 					indivfile = strtopath(line);
