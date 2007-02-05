@@ -4,7 +4,7 @@ CC=gcc
 
 #WFLAGS=-Wall
 
-CSRC = aux.c reclinker.c pathparse.c myarray.c get_line_from_file.c
+CSRC = misc.c reclinker.c pathparse.c myarray.c get_line_from_file.c
 
 COBJS = ${CSRC:.c=.o}
 

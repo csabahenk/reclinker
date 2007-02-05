@@ -160,7 +160,9 @@ void freepath(struct pathnode *p);
 
 int appendtomyarray(struct myarray *arr, char *string);
 #define appendasadir(arr, string) {					\
-	appendtomyarray(arr,"/");					\
+	if (arr->str[0] == '\0' ||					\
+	    arr->str[strlen(arr->str) - 1] != '/')			\
+		appendtomyarray(arr,"/");				\
 	appendtomyarray(arr,string);					\
 }
 int prependtomyarray(struct myarray *arr, char *string);
