@@ -389,7 +389,7 @@ reclinker()
 
 	while ((pstate.pn = pstate.pn->next)) {
 		int prune = 0;
-		char *aux, *realwhere = NULL;
+		char *aux = NULL, *realwhere = NULL;
 
 		what = pstate.pn->name;
 		if (strcmp(what,".") == 0 || strcmp(what,"..") == 0)
