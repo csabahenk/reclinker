@@ -26,8 +26,8 @@ char *
 strreduce(char *from, const char *reduce_with)
 {
 	while(*reduce_with == *from && *reduce_with != '\0') {
-		*reduce_with++;
-		*from++;
+		reduce_with++;
+		from++;
 	}
 	if(*reduce_with == '\0')
 		return strdup(from);
@@ -38,8 +38,8 @@ int
 strsubtest(char *from, const char *reduce_with)
 {
 	while(*reduce_with == *from && *reduce_with != '\0') {
-		*reduce_with++;
-		*from++;
+		reduce_with++;
+		from++;
 	}
 	if(*reduce_with == '\0')
 		return 1;

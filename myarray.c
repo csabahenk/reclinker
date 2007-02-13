@@ -41,8 +41,8 @@ prependtomyarray(struct myarray *arr, char *string)
 			*q = *p;
 			if(p == arr->str)
 				break;
-			*q--;
-			*p--;
+			q--;
+			p--;
 		}
 		arr->strmid = q + (arr->strmid - arr->str);
 		arr->str = q;
