@@ -439,6 +439,14 @@ reclinker()
 								dupemyarray(prefix, pstate.prefix);
 
 							resetmyarray(prefix);
+							if (! realwhere)
+								/*
+								 *  where->str might be ceated in preselfcall()
+								 *  in which case realwhere needs to be recomputed
+								 */
+								realwhere = my_realpath(where->str);
+							/* XXX this assertion doesn't cares about races with the real world */
+							assert(realwhere);
 							pathbetween = str_relpath(realwhere,abspref);
 							appendtomyarray(prefix,pathbetween);
 
