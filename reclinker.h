@@ -160,8 +160,18 @@ void freepath(struct pathnode *p);
 
 int appendtomyarray(struct myarray *arr, char *string);
 #define appendasadir(arr, string) {					\
-	if (arr->str[0] == '\0' ||					\
-	    arr->str[strlen(arr->str) - 1] != '/')			\
+	/*								\
+	 * Ensure to have exactly one path separator between the	\
+	 * original path and the addendum.				\
+	 * If no right side yet for the path, also ensure strmid is	\
+	 * set to the separator.					\
+	 */								\
+ 	if (arr->str[0] == '/' && arr->str[1] == '\0') {		\
+		assert(arr->strmid == arr->str + 1);			\
+		assert(arr->strend == arr->str + 1);			\
+		arr->strmid--;						\
+	} else if (arr->str[0] == '\0' ||				\
+	           arr->str[strlen(arr->str) - 1] != '/')		\
 		appendtomyarray(arr,"/");				\
 	appendtomyarray(arr,string);					\
 }
