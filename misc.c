@@ -480,3 +480,37 @@ int rec_pointto(char *linkname, char *filename)
 	errno = ELOOP;
 	return 0;
 }	
+
+/*
+ * Read at most len bytes from file into buf, until we hit EOF or sepchar or 0.
+ * Upon hitting EOF or sepchar without error, buf is 0 terminated, and the
+ * length of the resulting string (excluding the final zero) is returned.
+ *
+ * Else -- ie., we got an error, we read 0 when sepchar is not zero,
+ * we read len bytes without sepchar or zero -- -1 is returned in
+ * order to signal an error.
+ */
+int
+get_line_from_file(FILE *file, char *buf, size_t len, char sepchar)
+{
+	int i = 0;
+	char c;	
+
+	if (len == 0)
+		return 0;
+
+	for (; i < len; i++) {
+		c = fgetc(file);
+		if (c == EOF || c == sepchar) {
+			if (ferror(file))
+				return -1;
+			buf[i] = '\0';
+			return i;
+		}
+		if (c == '\0')
+			return -1;
+		buf[i] = c;
+	}
+
+	return -1;
+}

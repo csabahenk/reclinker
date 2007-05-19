@@ -667,7 +667,10 @@ main(int argc, char **argv)
 				reclinker();
 				postselfcall();
 			} else {			
-				char *line, sepchar;
+				char line[PATH_MAX], sepchar;
+				int res;
+				unsigned lno;
+
 				switch((*argv[i])) {
 				case '-':
 					sepchar = '\n';
@@ -679,11 +682,17 @@ main(int argc, char **argv)
 					fprintf(stderr, "stdin parsing mode sigill is weird\n");
 					abort();
 				}	
-				while ((line = get_line_from_file(stdin,sepchar))) {
+				for (lno = 1; lno++; ) {
+					res = get_line_from_file(stdin, line, sizeof(line), sepchar);
+					if (res <= 0) {
+						if (res == 0)
+							break;
+						fprintf(stderr, "invalid input line %u\n", lno);
+						exit(FATAL);
+					}
 					indivfile = strtopath(line);
 					reclinker();
 					postselfcall();
-					free(line);
 				}
 			}
 		}

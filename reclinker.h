@@ -200,4 +200,4 @@ int prependtomyarray(struct myarray *arr, char *string);
 
 /* get_line_from_file.c */
 
-extern char *get_line_from_file(FILE *file,char sepchar);
+extern int get_line_from_file(FILE *file, char *buf, size_t len, char sepchar);
