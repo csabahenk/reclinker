@@ -1,0 +1,37 @@
+// This text is in Asciidoc format, see http://www.methods.co.nz/asciidoc/ .
+
+reclinker
+=========
+
+reclinker is a recursive symlinking utility. It mirrors a hierarchy of files
+by means of symlinks.
+
+It's similar to http://www.gnu.org/software/stow/[GNU Stow], however:
+
+- written in pure C (no dependencies, fast)
+- free of forced, confusing package management terminology
+  (like _stow dir_, _target dir_, _package_)
+- supports both absolut and relative linking
+- supports linking into existing hierarchies, handles
+  properly already existing directory symlinks in the
+  target hierarchy (like `/usr/man -> share/man`)
+- supports access control (set ownership/mode of created
+  links/directories, filter processed files based on
+  ownership/mode requirements)
+- license is LGPL, not GPL (some may think it's a feature)
+
+It also has a feature which makes it similar to http://en.wikipedia.org/wiki/Cpio[cpio]
+passthrough mode: reclinker can take a list of files on stdin, and link only those
+files which occur in the list.
+
+reclinker was written to be the part of a more comprehensive symlinky package management
+scheme, http://creo.hu/~csaba/projects/ifs[IFS]. IFS is not ready but you can just start
+using reclinker immediately.
+
+Current version is 0.4.
+
+- http://creo.hu/~csaba/stuff/reclinker/[homepage]
+- http://mercurial.creo.hu/repos/reclinker/?archive/0.4.tar.gz[reclinker 0.4 tarball]
+- http://mercurial.creo.hu/repos/reclinker/[Mercurial repo / web interface]
+- http://mercurial.creo.hu/repos/reclinker/?archive/tip.tar.gz[reclinker devel tarball]
+- http://mercurial.creo.hu/repos/reclinker/?rss-log[commit RSS]
