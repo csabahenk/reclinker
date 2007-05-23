@@ -2,6 +2,7 @@
 
 reclinker
 =========
+Csaba Henk
 
 reclinker is a recursive symlinking utility. It mirrors a hierarchy of files
 by means of symlinks.
@@ -30,8 +31,23 @@ using reclinker immediately.
 
 Current version is 0.4.
 
+Links
+-----
+
 - http://creo.hu/~csaba/stuff/reclinker/[homepage]
 - http://creo.hu/~csaba/stuff/reclinker/reclinker-0.4.tar.gz[reclinker 0.4 tarball]
-- http://mercurial.creo.hu/repos/reclinker/[Mercurial repo / web interface]
+- http://www.selenic.com/mercurial/[Mercurial] http://mercurial.creo.hu/repos/reclinker/[repo / web interface]
+  (get it with `hg clone http://mercurial.creo.hu/repos/reclinker/`)
 - http://mercurial.creo.hu/repos/reclinker/?archive/tip.tar.gz[reclinker devel tarball]
 - http://mercurial.creo.hu/repos/reclinker/?rss-log[commit RSS]
+
+See the COPYRIGHT file in the source to reach me.
+
+Documentation
+-------------
+
+This is what you see by typing `reclinker -h`:
+
+---------------------
+sys::[./reclinker -h]
+---------------------
