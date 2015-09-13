@@ -135,7 +135,7 @@ createdir()
 			
 	} else if (errno == EEXIST 
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
-    defined(__DragonFly__)
+    defined(__DragonFly__) || defined(__APPLE__)
 	           /* work around weird BSD errno upon mkdir("/") */
                    || errno == EISDIR
 #endif
