@@ -73,7 +73,7 @@ error(char *msg,...)
 
 	va_start(vl,msg);
 	while ((s = va_arg(vl, char *)))
-		fprintf(stderr,s);
+		fprintf(stderr, "%s", s);
 	va_end(vl);
 
 	fprintf(stderr,": ");
