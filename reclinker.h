@@ -56,36 +56,36 @@ struct myarray
 
 
 
-int program_retval;
-char* from;
-char* fromorig;
-char* fromorep;
+extern int program_retval;
+extern char* from;
+extern char* fromorig;
+extern char* fromorep;
 /* char* where; */
-struct myarray *where;
-char * what;
-char *whereorig;
-char *whereorep;
-int verbosity;
-int force;
-int rel;
-mode_t mode; 
-mode_t mode_forced;
-int onlydir;
-int deletemode;
-int firstmodeused;
-int othermodeused;
-mode_t mask;
-int uid, gid;
-int Uid, Gid;
+extern struct myarray *where;
+extern char * what;
+extern char *whereorig;
+extern char *whereorep;
+extern int verbosity;
+extern int force;
+extern int rel;
+extern mode_t mode;
+extern mode_t mode_forced;
+extern int onlydir;
+extern int deletemode;
+extern int firstmodeused;
+extern int othermodeused;
+extern mode_t mask;
+extern int uid, gid;
+extern int Uid, Gid;
 /* uid_t uid, gid; */
 /* uid_t Uid, Gid; */
-char *usrname;
-char *grpname;
-char *Usrname;
-char *Grpname;
-char* me;
+extern char *usrname;
+extern char *grpname;
+extern char *Usrname;
+extern char *Grpname;
+extern char* me;
 #ifdef DEBUG
-long int count;
+extern long int count;
 #endif
 
 char *strreduce(char*, const char*);
@@ -126,7 +126,7 @@ struct pathnode
         struct pathnode *prev;
 };
 
-struct pathnode *indivfile;
+extern struct pathnode *indivfile;
 
 struct pathnode *strtopath(char *pathstr);
 char *pathtostr(struct pathnode *p);

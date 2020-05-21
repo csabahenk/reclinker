@@ -1,5 +1,40 @@
 #include "reclinker.h"
 
+/* shared globals */
+int program_retval;
+char* from;
+char* fromorig;
+char* fromorep;
+/* char* where; */
+struct myarray *where;
+char * what;
+char *whereorig;
+char *whereorep;
+int verbosity;
+int force;
+int rel;
+mode_t mode;
+mode_t mode_forced;
+int onlydir;
+int deletemode;
+int firstmodeused;
+int othermodeused;
+mode_t mask;
+int uid, gid;
+int Uid, Gid;
+/* uid_t uid, gid; */
+/* uid_t Uid, Gid; */
+char *usrname;
+char *grpname;
+char *Usrname;
+char *Grpname;
+char* me;
+#ifdef DEBUG
+long int count;
+#endif
+struct pathnode *indivfile;
+
+
 int (*preselfcall)();
 void (*postselfcall)();
 
