@@ -1,7 +1,5 @@
 PREFIX=/usr/local
 
-CC=gcc
-
 CFLAGS=-Wall -g -O
 
 CSRC = misc.c reclinker.c pathparse.c myarray.c
