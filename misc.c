@@ -250,6 +250,7 @@ Options in deleter mode are:\n\
   -u <user>\tdeletes <where>/foo only if it belongs to <user>\n\
   -g <group>\tdeletes <where>/foo only if it belongs to <group>\n\
   -D\t\tdon't delete directories \n\
+  -t\t\tdelete only if entry passes test (as in test mode)\n\
  \n\
 Options in test mode are:\n\
 \n\

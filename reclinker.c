@@ -35,6 +35,9 @@ long int count;
 struct pathnode *indivfile;
 
 
+int test_in_delete = 0;
+int test_with_ref(int *res);
+
 int (*preselfcall)();
 void (*postselfcall)();
 
@@ -66,6 +69,15 @@ removelink()
 	if (lstat(what, &whatstat) != 0)	
 		error("can't stat",fromorep,where->strmid,NULL);
 
+	if (test_in_delete) {
+		int testres = SUCCESS;
+		int testret;
+
+		testret = test_with_ref(&testres);
+		if (testres != SUCCESS)
+			return testret;
+	}
+	/* XXX this will be a duplicate call to checkUG if test_in_delete */
 	checkUG(whatstat);
 	
 	if ((whatstat.st_mode & S_IFMT) == S_IFDIR) {
@@ -266,9 +278,9 @@ modeforcer()
  		perror("setting mode failed");
 	}
 }
-	
+
 int
-test()
+test_with_ref(int *res)
 {
         struct stat whatstat;
         struct stat wherestat;
@@ -298,14 +310,14 @@ test()
 	
 	if (stat_retval != 0) {
 		printf("%s%s%s: can't stat: %s\n",whereorep,where->strmid,typeind,strerror(errno));
-		program_retval = SMALLPROB;
+		*res = SMALLPROB;
 		return 0; /* We don't descend into what in vain */	
 	} else if ((firstmodeused && mode != (whatstat.st_mode & S_IRWXAUGS)) ||
 		   (uid != -1 && uid != wherestat.st_uid) ||
 		   (gid != -1 && gid != wherestat.st_gid)) {
 		if (retval == 0) {
 			printf("%s%s%s: permissions, owner or group is not as it's required\n",whereorep,where->strmid,typeind);
-			program_retval = SMALLPROB;
+			*res = SMALLPROB;
 		}
 		return retval;
 	}
@@ -317,16 +329,16 @@ test()
 				printf("%s%s/ is OK\n",whereorep,where->strmid);
 		} else {
 			printf("%s%s/ exists but it's not a dir\n",whereorep,where->strmid);
-			program_retval = SMALLPROB;
+			*res = SMALLPROB;
 			retval = 0; /* don't descend into "what" in vain */
 		}
 	}
 	else if ((wherestat.st_mode & S_IFMT) != S_IFLNK) {
-		program_retval = SMALLPROB;
+		*res = SMALLPROB;
 		printf("%s%s exists but it's not a symlink\n",whereorep,where->strmid);
 		return retval;
 	} else if (! rec_pointto(where->str,what)) {
-		program_retval = SMALLPROB;
+		*res = SMALLPROB;
 		printf("%s%s is an existing symlink but it's not resolved in %s%s\n",whereorep,where->strmid,fromorep,where->strmid);
 		return retval;
 	} else {	
@@ -338,7 +350,7 @@ test()
 		free(l);
 		free(f);
 		if (v != 0) {
-			program_retval = SMALLPROB;
+			*res = SMALLPROB;
 			printf("%s%s is a symlink resolved in %s%s, but it's pointing there only indirectly\n",whereorep,where->strmid,fromorep,where->strmid);
 			return retval;
 		} else {
@@ -346,7 +358,7 @@ test()
 			v = strcmp(f,prefix->str);
 			free(f);
 			if (v != 0) {
-				program_retval = SMALLPROB;
+				*res = SMALLPROB;
 				printf("%s%s is a symlink pointing to where it should but the value is not named as it should be\n",whereorep,where->strmid);
 			} else if (verbosity >= 2) {	
 				printf("%s%s is OK\n",whereorep,where->strmid);
@@ -355,8 +367,14 @@ test()
 	}
 	return retval;
 }
-					
-			
+
+int
+test()
+{
+	return test_with_ref(&program_retval);
+}
+
+
 
 void
 noop()
@@ -433,7 +451,7 @@ reclinker()
 
 		pstate.postgrowth = strlen(what) + 1;
 		appendasadir(where,what);
-		if (deletemode != 1)
+		if (prefix)
 			appendasadir(prefix,what);
 
 		/*
@@ -528,7 +546,7 @@ reclinker()
 		} else
 			free(realwhere);
 		backabit(where, pstate.postgrowth);
-		if (deletemode != 1)
+		if (prefix)
 			backabit(prefix, pstate.postgrowth);
 	}
 	freepath(pstate.root);
@@ -547,6 +565,7 @@ main(int argc, char **argv)
 	void act_as_recdeleter(int argc, char** argv);	
 	void act_as_reclinktester(int argc, char** argv);
 	int len;		
+	int prev_deletemode = -1;
 
 	me = (char*)basename(argv[0]);
 
@@ -571,12 +590,14 @@ main(int argc, char **argv)
 			rel=1;
 			break;
 		case 'd':
+			prev_deletemode = deletemode;
 			deletemode=1;
 			break;
 		case 'l':
 			deletemode=0;
 			break;
 		case 't':
+			prev_deletemode = deletemode;
 			deletemode=2;
 			break;		
 		case 'f':
@@ -677,10 +698,17 @@ main(int argc, char **argv)
 		act_as_reclinker(argc,argv);
 		break;
 	case 1: 
+		if (prev_deletemode == 2)
+			test_in_delete = 1;
 		act_as_recdeleter(argc,argv);
 		break;
 	case 2:
-		act_as_reclinktester(argc,argv);
+		if (prev_deletemode == 1) {
+			test_in_delete = 1;
+			deletemode = 1;
+			act_as_recdeleter(argc,argv);
+		} else
+			act_as_reclinktester(argc,argv);
 		break;
 	default:
 		fprintf(stderr,"%d: no such mode defined\n",deletemode);
@@ -740,7 +768,7 @@ main(int argc, char **argv)
 	exit(program_retval);
 }
 	
-#define initprefix {							\
+#define initprefix() do {						\
 	if (prefixorig == NULL) {					\
 		if (rel) {						\
 			prefixorig = str_relpath(whereabs,from);	\
@@ -751,7 +779,7 @@ main(int argc, char **argv)
 	appendtomyarray(prefix,prefixorig);				\
 	if (!strsubtest(prefix->str,"../"))				\
 		forceproperprefix = 1;					\
-}
+} while (0)
 
 void
 act_as_reclinker(int argc, char** argv)
@@ -832,7 +860,7 @@ goon:
 	free(currdir);
 	free(aux);
  
-	initprefix;
+	initprefix();
 	
 	preselfcall = linker;
 	postselfcall = modeforcer;
@@ -853,12 +881,16 @@ act_as_recdeleter(int argc, char** argv)
 	preselfcall = removelink;
 	postselfcall = removedir;
 
+	if (test_in_delete) {
+		whereabs = my_realpath(where->str);
+		initprefix();
+	} else
+		rel=0; /*recdeleter makes no use of -r*/
 	what = my_realpath(from);
 	if (preselfcall() == 0)
 		exit(SUCCESS);
 	free(what);
 
-	rel=0; /*recdeleter makes no use of -r*/
 }
 
 void
@@ -874,7 +906,7 @@ act_as_reclinktester(int argc, char** argv)
 
 	whereabs = my_realpath(where->str);
  
-	initprefix;
+	initprefix();
 	
 	preselfcall = test;
 	postselfcall = noop;
